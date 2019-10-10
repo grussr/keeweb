@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "canOpenDemo": false,
+    "canCreate": false,
+    "canImportXml": false,
+
+    "dropbox": false,
+    "gdriveClientId": "695384054760-917abo2bbe4e7jle5a7sdkml9qd0ppth.apps.googleusercontent.com",
+
+    "onedrive": false
+  }
+}
