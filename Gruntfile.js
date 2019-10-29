@@ -1,13 +1,15 @@
 /* eslint-env node */
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
+const debug = require('debug');
 
 const webpackConfig = require('./build/webpack.config');
+const webpackConfigTest = require('./test/test.webpack.config');
 const pkg = require('./package.json');
-const hookRcedit = require('./build/util/hook-rcedit');
+const codeSignConfig = require('../keys/codesign');
 
-hookRcedit.setup();
+debug.enable('electron-notarize');
 
 module.exports = function(grunt) {
     require('time-grunt')(grunt);
@@ -28,6 +30,14 @@ module.exports = function(grunt) {
     const zipCommentPlaceholder =
         zipCommentPlaceholderPart + '.'.repeat(512 - zipCommentPlaceholderPart.length);
     const electronVersion = pkg.dependencies.electron.replace(/^\D/, '');
+
+    const webpackOptions = {
+        date,
+        beta: !!grunt.option('beta'),
+        get sha() {
+            return grunt.config.get('gitinfo.local.branch.current.shortSHA');
+        }
+    };
 
     grunt.initConfig({
         gitinfo: {
@@ -125,21 +135,6 @@ module.exports = function(grunt) {
                 dest: 'tmp/desktop/KeeWeb-win32-x64/Resources/',
                 nonull: true
             },
-            'desktop-darwin-helper-x64': {
-                src: 'helper/darwin/KeeWebHelper',
-                dest: 'tmp/desktop/KeeWeb-darwin-x64/KeeWeb.app/Contents/Resources/',
-                nonull: true,
-                options: { mode: '0755' }
-            },
-            'desktop-darwin-installer': {
-                cwd: 'package/osx/KeeWeb Installer.app',
-                dest:
-                    'tmp/desktop/KeeWeb-darwin-x64/KeeWeb.app/Contents/Installer/KeeWeb Installer.app',
-                src: '**',
-                expand: true,
-                nonull: true,
-                options: { mode: true }
-            },
             'desktop-win32-dist-x64': {
                 src: 'tmp/desktop/KeeWeb.win.x64.exe',
                 dest: `dist/desktop/KeeWeb-${pkg.version}.win.x64.exe`,
@@ -226,11 +221,12 @@ module.exports = function(grunt) {
             }
         },
         webpack: {
-            js: webpackConfig.config(grunt)
+            app: webpackConfig.config(webpackOptions),
+            test: webpackConfigTest
         },
         'webpack-dev-server': {
             options: {
-                webpack: webpackConfig.config(grunt, 'development'),
+                webpack: webpackConfig.config({ ...webpackOptions, mode: 'development' }),
                 publicPath: '/',
                 contentBase: path.resolve(__dirname, 'tmp'),
                 progress: false
@@ -238,16 +234,6 @@ module.exports = function(grunt) {
             js: {
                 keepalive: true,
                 port: 8085
-            }
-        },
-        watch: {
-            options: {
-                interrupt: true,
-                debounceDelay: 500
-            },
-            indexhtml: {
-                files: 'app/index.html',
-                tasks: ['copy:html']
             }
         },
         electron: {
@@ -276,7 +262,55 @@ module.exports = function(grunt) {
                     icon: 'graphics/icon.icns',
                     appBundleId: 'net.antelle.keeweb',
                     appCategoryType: 'public.app-category.productivity',
-                    extendInfo: 'package/osx/extend.plist'
+                    extendInfo: 'package/osx/extend.plist',
+                    osxSign: {
+                        identity: codeSignConfig.identities.app,
+                        hardenedRuntime: true,
+                        entitlements: 'package/osx/entitlements.mac.plist',
+                        'entitlements-inherit': 'package/osx/entitlements.mac.plist',
+                        'gatekeeper-assess': false
+                    },
+                    osxNotarize: {
+                        appleId: codeSignConfig.appleId,
+                        appleIdPassword: '@keychain:AC_PASSWORD',
+                        ascProvider: codeSignConfig.teamId
+                    },
+                    afterCopy: [
+                        (buildPath, electronVersion, platform, arch, callback) => {
+                            if (path.basename(buildPath) !== 'app') {
+                                throw new Error('Bad build path: ' + buildPath);
+                            }
+                            const resPath = path.dirname(buildPath);
+                            if (path.basename(resPath) !== 'Resources') {
+                                throw new Error('Bad Resources path: ' + resPath);
+                            }
+                            const helperTargetPath = path.join(
+                                resPath,
+                                'helper/darwin/KeeWebHelper'
+                            );
+                            const helperSourcePath = path.join(
+                                __dirname,
+                                'helper/darwin/KeeWebHelper'
+                            );
+                            fs.copySync(helperSourcePath, helperTargetPath);
+
+                            const contentsPath = path.dirname(resPath);
+                            if (path.basename(contentsPath) !== 'Contents') {
+                                throw new Error('Bad Contents path: ' + contentsPath);
+                            }
+                            const installerSourcePath = path.join(
+                                __dirname,
+                                'package/osx/KeeWeb Installer.app'
+                            );
+                            const installerTargetPath = path.join(
+                                contentsPath,
+                                'Installer/KeeWeb Installer.app'
+                            );
+                            fs.copySync(installerSourcePath, installerTargetPath);
+
+                            callback();
+                        }
+                    ]
                 }
             },
             win32: {
@@ -293,21 +327,6 @@ module.exports = function(grunt) {
                         InternalName: 'KeeWeb'
                     }
                 }
-            }
-        },
-        codesign: {
-            app: {
-                options: {
-                    identity: 'app',
-                    deep: true
-                },
-                src: ['tmp/desktop/KeeWeb-darwin-x64/KeeWeb.app']
-            },
-            dmg: {
-                options: {
-                    identity: 'app'
-                },
-                src: [`dist/desktop/KeeWeb-${pkg.version}.mac.dmg`]
             }
         },
         compress: {
@@ -551,6 +570,12 @@ module.exports = function(grunt) {
                     ]
                 }
             }
+        },
+        'run-test': {
+            options: {
+                headless: true
+            },
+            default: 'test/runner.html'
         }
     });
 };

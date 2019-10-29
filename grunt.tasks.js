@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         'copy:icons',
         'copy:manifest',
         'copy:fonts',
-        'webpack',
+        'webpack:app',
         'inline',
         'htmlmin',
         'string-replace:service-worker',
@@ -36,12 +36,9 @@ module.exports = function(grunt) {
         'electron',
         'sign-exe:win32-build-x64',
         'sign-exe:win32-build-ia32',
-        'copy:desktop-darwin-helper-x64',
-        'copy:desktop-darwin-installer',
         'copy:desktop-windows-helper-ia32',
         'copy:desktop-windows-helper-x64',
-        'chmod:linux-desktop-x64',
-        'codesign:app'
+        'chmod:linux-desktop-x64'
     ]);
 
     grunt.registerTask('build-desktop-archives', [
@@ -50,7 +47,7 @@ module.exports = function(grunt) {
         'compress:linux-x64'
     ]);
 
-    grunt.registerTask('build-desktop-dist-darwin', ['appdmg', 'codesign:dmg']);
+    grunt.registerTask('build-desktop-dist-darwin', ['appdmg']);
 
     grunt.registerTask('build-desktop-dist-win32', [
         'nsis:win32-un-x64',
@@ -87,4 +84,6 @@ module.exports = function(grunt) {
     grunt.registerTask('build-cordova-app-content', ['string-replace:cordova-html']);
 
     grunt.registerTask('build-cordova', ['gitinfo', 'clean:cordova', 'build-cordova-app-content']);
+
+    grunt.registerTask('build-test', ['webpack:test']);
 };
