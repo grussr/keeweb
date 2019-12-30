@@ -1,6 +1,6 @@
 {
   "settings": {
-    "theme": "terminal",
+    "theme": "Terminal",
     "canOpenDemo": false,
     "canCreate": false,
     "canImportXml": false,
@@ -11,7 +11,7 @@
     "onedrive": false,
 
     "plugins": [{ 
-      "url": "plugins/haveibeenpwned/plugin.js"
+      "url": "plugins/haveibeenpwned"
     }]
   }
 }
