@@ -9,9 +9,8 @@
     "gdriveClientId": "695384054760-917abo2bbe4e7jle5a7sdkml9qd0ppth.apps.googleusercontent.com",
     "webdav": false,
     "onedrive": false,
-
+  },
     "plugins": [{ 
       "url": "https://plugins.keeweb.info/plugins/theme-nord/"
     }]
-  }
 }
