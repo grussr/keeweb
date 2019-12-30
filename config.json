@@ -1,6 +1,6 @@
 {
   "settings": {
-    "theme": "wh",
+    "theme": "nord",
     "canOpenDemo": false,
     "canCreate": false,
     "canImportXml": false,
@@ -11,7 +11,7 @@
     "onedrive": false,
 
     "plugins": [{ 
-      "url": "https://passwords.gruss.dev/plugins/haveibeenpwned/"
+      "url": "https://plugins.keeweb.info/plugins/theme-nord/"
     }]
   }
 }
