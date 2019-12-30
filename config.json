@@ -1,17 +1,17 @@
 {
   "settings": {
-    "theme": "Terminal",
+    "theme": "t",
     "canOpenDemo": false,
     "canCreate": false,
     "canImportXml": false,
 
     "dropbox": false,
     "gdriveClientId": "695384054760-917abo2bbe4e7jle5a7sdkml9qd0ppth.apps.googleusercontent.com",
-
+    "webdav": false,
     "onedrive": false,
 
     "plugins": [{ 
-      "url": "plugins/haveibeenpwned"
+      "url": "https://passwords.gruss.dev/plugins/haveibeenpwned/"
     }]
   }
 }
