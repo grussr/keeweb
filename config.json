@@ -1,6 +1,7 @@
 {
   "settings": {
     "theme": "nord",
+    "tableView": true,
     "canOpenDemo": false,
     "canCreate": false,
     "canImportXml": false,
@@ -12,5 +13,8 @@
   },
     "plugins": [{ 
       "url": "https://plugins.keeweb.info/plugins/theme-nord/"
-    }]
+    },
+  {
+    "url":"plugins/haveibeenpwned"
+  }]
 }
