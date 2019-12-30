@@ -14,7 +14,8 @@
   "files": [{ 
     "storage": "gdrive", 
     "name": "All passwords", 
-    "path": "Allthepasswords.kdbx"
+    "path": "webdav-url", 
+    "options": { "user": "", "password": "" }
   }],
   "plugins": [
     { 
