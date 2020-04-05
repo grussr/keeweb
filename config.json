@@ -19,7 +19,7 @@
   }],
   "plugins": [
     { 
-      "url": "https://plugins.keeweb.info/plugins/theme-nord/"
+      "url": "plugins/theme-nord/"
     },
     {
       "url":"plugins/haveibeenpwned"
